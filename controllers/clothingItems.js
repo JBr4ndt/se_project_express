@@ -1,26 +1,5 @@
 const ClothingItem = require("../models/clothingItem");
-const { ERROR_400, ERROR_404, ERROR_500 } = require("../utils/errors");
-
-function handleClothingItemsError(req, res, err) {
-  if (err.name === "ValidationError") {
-    return res.status(ERROR_400).send({
-      message: `invalid data passed to the methods for creating or updating an item`,
-    });
-  }
-  if (err.name === "CastError") {
-    return res
-      .status(ERROR_400)
-      .send({ message: `invalid ID passed to the params` });
-  }
-  if (err.name === "DocumentNotFoundError") {
-    return res.status(ERROR_404).send({
-      message: `There is no clothing item with the requested id, or the request was sent to a non-existent address`,
-    });
-  }
-  return res
-    .status(ERROR_500)
-    .send({ message: `An error has occurred on the server` });
-}
+const { handleError } = require("../utils/errors");
 
 const getItems = (req, res) => {
   ClothingItem.find({})
@@ -28,7 +7,7 @@ const getItems = (req, res) => {
       res.status(200).send(items);
     })
     .catch((err) => {
-      handleClothingItemsError(req, res, err);
+      handleError(req, res, err);
     });
 };
 
@@ -41,7 +20,7 @@ const createItem = (req, res) => {
       res.send({ data: item });
     })
     .catch((err) => {
-      handleClothingItemsError(req, res, err);
+      handleError(req, res, err);
     });
 };
 
@@ -55,7 +34,7 @@ const updateItem = (req, res) => {
       res.status(200).send({ data: item });
     })
     .catch((err) => {
-      handleClothingItemsError(req, res, err);
+      handleError(req, res, err);
     });
 };
 
@@ -68,7 +47,7 @@ const deleteItem = (req, res) => {
       res.status(200).send({ message: "Item successfully deleted" });
     })
     .catch((err) => {
-      handleClothingItemsError(req, res, err);
+      handleError(req, res, err);
     });
 };
 
@@ -83,7 +62,7 @@ const likeItem = (req, res) => {
       res.send({ data: item });
     })
     .catch((err) => {
-      handleClothingItemsError(req, res, err);
+      handleError(req, res, err);
     });
 };
 
@@ -98,7 +77,7 @@ const dislikeItem = (req, res) => {
       res.send({ data: item });
     })
     .catch((err) => {
-      handleClothingItemsError(req, res, err);
+      handleError(req, res, err);
     });
 };
 
