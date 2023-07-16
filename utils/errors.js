@@ -26,10 +26,12 @@ function handleError(req, res, err) {
 }
 
 function handleUnauthError(req, res, err) {
+  console.log(err);
   res.status(ERROR_401).send({ message: "Authorization Required" });
 }
 
 function handleForbiddenError(req, res, err) {
+  console.log(err);
   res.status(ERROR_403).send({
     message: "Unauthorized: You don't have permission to access on this source",
   });

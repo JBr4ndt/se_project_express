@@ -55,7 +55,10 @@ const createUser = (req, res) => {
         .then((hash) => User.create({ name, avatar, email, password: hash }))
         .then((user) => {
           res.status(201).send({
-            data: user,
+            _id: user._id,
+            name: user.name,
+            avatar: user.avatar,
+            email: user.email,
           });
         });
     })
