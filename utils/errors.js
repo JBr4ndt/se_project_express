@@ -1,4 +1,6 @@
 const ERROR_400 = 400;
+const ERROR_401 = 401;
+const ERROR_403 = 403;
 const ERROR_404 = 404;
 const ERROR_500 = 500;
 
@@ -23,9 +25,21 @@ function handleError(req, res, err) {
     .send({ message: `An error has occurred on the server` });
 }
 
+function handleUnauthError(req, res, err) {
+  res.status(ERROR_401).send({ message: "Authorization Required" });
+}
+
+function handleForbiddenError(req, res, err) {
+  res.status(ERROR_403).send({
+    message: "Unauthorized: You don't have permission to access on this source",
+  });
+}
+
 module.exports = {
   ERROR_400,
   ERROR_404,
   ERROR_500,
   handleError,
+  handleUnauthError,
+  handleForbiddenError,
 };

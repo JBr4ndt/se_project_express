@@ -1,5 +1,5 @@
 const ClothingItem = require("../models/clothingItem");
-const { handleError } = require("../utils/errors");
+const { handleError, handleForbiddenError } = require("../utils/errors");
 
 const getItems = (req, res) => {
   ClothingItem.find({})
@@ -40,11 +40,17 @@ const updateItem = (req, res) => {
 
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
+  const userId = req.user._id;
 
-  ClothingItem.findByIdAndDelete(itemId)
+  ClothingItem.findById(itemId)
     .orFail()
-    .then(() => {
-      res.status(200).send({ message: "Item successfully deleted" });
+    .then((item) => {
+      if (item.owner.toString() !== userId) {
+        return handleForbiddenError(req, res);
+      }
+      return ClothingItem.findByIdAndDelete(itemId).then(() => {
+        res.status(200).send({ message: "Item successfully deleted" });
+      });
     })
     .catch((err) => {
       handleError(req, res, err);
