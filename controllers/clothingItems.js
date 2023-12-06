@@ -17,7 +17,7 @@ const createItem = (req, res) => {
 
   ClothingItem.create({ name, weather, imageUrl, owner })
     .then((item) => {
-      res.send({ data: item });
+      res.send(item);
     })
     .catch((err) => {
       handleError(req, res, err);
@@ -31,7 +31,7 @@ const updateItem = (req, res) => {
   ClothingItem.findByIdAndUpdate(itemId, { $set: { imageUrl } })
     .orFail()
     .then((item) => {
-      res.status(200).send({ data: item });
+      res.status(200).send(item);
     })
     .catch((err) => {
       handleError(req, res, err);
@@ -65,7 +65,7 @@ const likeItem = (req, res) => {
   )
     .orFail()
     .then((item) => {
-      res.send({ data: item });
+      res.send(item);
     })
     .catch((err) => {
       handleError(req, res, err);
@@ -80,7 +80,7 @@ const dislikeItem = (req, res) => {
   )
     .orFail()
     .then((item) => {
-      res.send({ data: item });
+      res.send(item);
     })
     .catch((err) => {
       handleError(req, res, err);

@@ -14,7 +14,7 @@ const getCurrentUser = (req, res) => {
   User.findById(userId)
     .orFail()
     .then((user) => {
-      res.status(200).send({ data: user });
+      res.status(200).send(user);
     })
     .catch((err) => {
       handleError(req, res, err);
@@ -35,8 +35,7 @@ const updateUser = (req, res) => {
       if (!updatedUser) {
         return res.status(ERROR_404).send({ message: "User not found" });
       }
-
-      return res.status(200).send({ data: updatedUser });
+      return res.status(200).send(updatedUser);
     })
     .catch((err) => {
       handleError(req, res, err);
@@ -56,7 +55,7 @@ const createUser = (req, res) => {
         .then((hash) => User.create({ name, avatar, email, password: hash }))
         .then((user) => {
           res.status(201).send({
-            _id: user._id,
+            //_id: user._id,
             name: user.name,
             avatar: user.avatar,
             email: user.email,
