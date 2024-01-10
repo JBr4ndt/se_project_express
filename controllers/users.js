@@ -1,28 +1,27 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
-const {
-  handleError,
-  handleUnauthError,
-  ERROR_404,
-} = require("../utils/errors");
 const { JWT_SECRET } = require("../utils/config");
+const BadRequestError = require("../utils/errors/BadRequestError");
+const NotFoundError = require("../utils/errors/NotFoundError");
+const ConflictError = require("../utils/errors/ConflictError");
+const UnauthorizedError = require("../utils/errors/UnauthorizedError");
 
-const getCurrentUser = (req, res) => {
+const getCurrentUser = (req, res, next) => {
   const userId = req.user._id;
 
   User.findById(userId)
-    .orFail()
+    .orFail(() => new NotFoundError("Requested user not found"))
     .then((user) => {
       res.status(200).send(user);
     })
     .catch((err) => {
-      handleError(req, res, err);
+      console.error(err);
+      next(err);
     });
 };
 
-const updateUser = (req, res) => {
-  //const { userId } = req.params;
+const updateUser = (req, res, next) => {
   const userId = req.user._id;
   const { name, avatar } = req.body;
 
@@ -31,31 +30,33 @@ const updateUser = (req, res) => {
     { name, avatar },
     { new: true, runValidators: true }
   )
+    .orFail(() => new NotFoundError("Requested user not found"))
     .then((updatedUser) => {
-      if (!updatedUser) {
-        return res.status(ERROR_404).send({ message: "User not found" });
-      }
-      return res.status(200).send(updatedUser);
+      res.status(200).send(updatedUser);
     })
     .catch((err) => {
-      handleError(req, res, err);
+      console.error(err);
+      if (err.name === "ValidationError") {
+        next(new BadRequestError("Invalid data passed"));
+      } else {
+        next(err);
+      }
     });
 };
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const { name, avatar, email, password } = req.body;
 
   User.findOne({ email })
     .then((existingUser) => {
       if (existingUser) {
-        return res.status(409).send({ message: "Email is already registered" });
+        throw new ConflictError("Email is already registered");
       }
       return bcrypt
         .hash(password, 10)
         .then((hash) => User.create({ name, avatar, email, password: hash }))
         .then((user) => {
           res.status(201).send({
-            //_id: user._id,
             name: user.name,
             avatar: user.avatar,
             email: user.email,
@@ -63,11 +64,16 @@ const createUser = (req, res) => {
         });
     })
     .catch((err) => {
-      handleError(req, res, err);
+      console.error(err);
+      if (err.name === "ValidationError") {
+        next(new BadRequestError("Invalid data passed"));
+      } else {
+        next(err);
+      }
     });
 };
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
@@ -78,7 +84,12 @@ const login = (req, res) => {
       res.send({ token });
     })
     .catch((err) => {
-      return handleUnauthError(req, res, err);
+      console.error(err);
+      if (err.message === "Incorrect email or password") {
+        next(new UnauthorizedError("Authorization required"));
+      } else {
+        next(err);
+      }
     });
 };
 
