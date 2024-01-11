@@ -11,6 +11,13 @@ const routes = require("./routes");
 
 mongoose.connect("mongodb://127.0.0.1:27017/wtwr_db");
 
+//Remove this code after passing review
+app.get("/crash-test", () => {
+  setTimeout(() => {
+    throw new Error("Server will crash now");
+  }, 0);
+});
+
 app.use(express.json());
 app.use(cors());
 
